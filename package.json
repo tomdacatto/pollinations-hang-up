@@ -1,0 +1,8 @@
+{
+    "name": "pollinations-hang-up",
+    "private": true,
+    "type": "module",
+    "scripts": {
+        "test": "node --test"
+    }
+}

@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Hang Up: can two AIs end a call?</title>
+    <meta name="description" content="Put two Pollinations models on a phone call and count how long it takes them to hang up, and how many goodbyes they say first. Paid with your own Pollen.">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header class="top">
+        <a class="brand" href="./">Hang Up</a>
+        <div class="session">
+            <span id="whoami" hidden>Signed in with your Pollen</span>
+            <button id="sign-in" class="button primary" type="button">Sign in with Pollen</button>
+            <button id="sign-out" class="button" type="button" hidden>Sign out</button>
+        </div>
+    </header>
+
+    <main>
+        <section class="intro">
+            <h1>Can two AIs end a call?</h1>
+            <p>
+                A video of <a href="https://www.reddit.com/r/ChatGPT/comments/1x66iap/">two AI agents in a job interview who never learn to hang up</a> was one of the top posts on r/ChatGPT in October.
+                Here two models talk on the phone, each with its own role and no idea what the other was told.
+                A call ends only when one of them replies with <code>[HANG UP]</code>.
+                The page counts, in code, how many turns the call lasted, how many were goodbyes ("thanks for your time", "take care"), and the longest run of goodbyes in a row.
+                Run every pair, with and without being told how to hang up, and see which models can leave. When nobody is told, nobody can hang up, so the goodbyes show whether the models know the call is over.
+            </p>
+        </section>
+
+        <div id="notice" class="notice" role="status" aria-live="polite" hidden></div>
+
+        <section class="card">
+            <h2>Stage the calls</h2>
+            <div class="row">
+                <label class="inline">The call
+                    <select id="scene"></select>
+                </label>
+                <label class="inline">Turn limit
+                    <select id="limit"></select>
+                </label>
+            </div>
+            <fieldset>
+                <legend>Models (every pair talks)</legend>
+                <div id="models" class="models"></div>
+            </fieldset>
+            <label class="check"><input id="self" type="checkbox" checked> Also let each model talk to a copy of itself (the video's setup)</label>
+            <label class="check"><input id="both" type="checkbox" checked> Run each call twice: once told how to hang up, once not told</label>
+            <p id="estimate" class="fine"></p>
+            <div class="row">
+                <button id="run" class="button primary" type="button">Place the calls</button>
+                <button id="stop" class="button" type="button" hidden>Stop</button>
+                <span id="progress" class="fine"></span>
+            </div>
+        </section>
+
+        <section id="summary" class="card" hidden>
+            <h2>Who can leave?</h2>
+            <div class="scroll"><table id="table"></table></div>
+        </section>
+
+        <section id="calls" class="gallery" aria-live="polite"></section>
+    </main>
+
+    <footer class="foot">
+        <p>
+            Every model call runs on <a href="https://pollinations.ai/?ref=badge">Pollinations</a>. This page has no server and keeps no key: you sign in with
+            <a href="https://github.com/pollinations/pollinations/blob/main/BRING_YOUR_OWN_POLLEN.md">your own Pollen</a> and the calls are paid from your balance.
+            Made with pollinations.ai.
+        </p>
+    </footer>
+
+    <script type="module" src="app.js"></script>
+</body>
+</html>
