@@ -7,12 +7,10 @@ export async function loadModels() {
     if (!res.ok) throw new Error(`The model list answered ${res.status}.`);
     const body = await res.json();
     return (body.data ?? body)
-        .filter((model) => model.output_modalities?.includes("text") && !model.pricing?.promptTextTokens === false)
+        .filter((model) => model.output_modalities?.includes("text") && model.pricing)
         .map((model) => ({
             name: model.name,
-            title: model.title ?? model.name,
             pricing: model.pricing,
-            vision: Boolean(model.input_modalities?.includes("image")),
             paidOnly: Boolean(model.paid_only),
         }))
         .sort((a, b) => Number(a.pricing.completionTextTokens) - Number(b.pricing.completionTextTokens));

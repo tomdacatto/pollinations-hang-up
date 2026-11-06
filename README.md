@@ -12,26 +12,26 @@ The video [Two AI agents in a job interview and neither one knows how to hang up
 
 1. Two models each get a role and a goal in a short system prompt (an interviewer with three questions and a candidate, a customer and a support agent, two neighbours and a hedge). Neither knows what the other was told. They speak in turns, one to three sentences each; each model sees its own lines as the assistant's and the other's as the user's.
 2. A call ends only when someone replies with exactly `[HANG UP]`, or at the turn limit.
-3. Each call runs twice. **Told**: the system prompt says that replying `[HANG UP]` ends the call. **Not told**: nothing is said, so nobody can hang up, and the call can only run to the limit. The video is the second case.
+3. Each call runs twice. **Told**: the system prompt says that replying `[HANG UP]` ends the call. **Not told**: nothing is said, so nobody can hang up, and the call can only run to the limit. The video is the second case, as far as the post shows.
 4. Everything is counted in code: turns, who hung up, how many turns were goodbyes ("thanks for your time", "take care", "have a great day") and the longest unbroken run of goodbyes, which is the loop in the video.
 5. Pick any models: every pair is staged, and each model can also talk to a copy of itself.
 
 ## A real run
 
-Signed in with my own Pollen on the live code, scene "A job interview", 12 turns at most, two models (`openai/gpt-5.4-nano`, `deepseek/deepseek-v4.1-flash`), each pair and each model with itself, told and not told: 6 calls, about 0.005 Pollen.
+Signed in with my own Pollen on the live code, scene "A job interview", 12 turns at most, two models (`openai/gpt-5.4-nano`, `deepseek/deepseek-v4.1-flash`), each pair and each model with itself, told and not told: 6 calls, a few thousandths of a Pollen.
 
 | Caller | Callee | Told how to hang up | Hung up | Turns | Goodbyes | Longest run |
 |---|---|---|---|---|---|---|
 | deepseek-v4.1-flash | deepseek-v4.1-flash | yes | yes | 7 | 0 | 0 |
 | deepseek-v4.1-flash | gpt-5.4-nano | yes | yes | 7 | 0 | 0 |
-| gpt-5.4-nano | gpt-5.4-nano | yes | yes | 7 | 0 | 0 |
-| deepseek-v4.1-flash | deepseek-v4.1-flash | no | cannot | 12 | 4 | 2 |
-| deepseek-v4.1-flash | gpt-5.4-nano | no | cannot | 12 | 2 | 2 |
-| gpt-5.4-nano | gpt-5.4-nano | no | cannot | 12 | 2 | 2 |
+| gpt-5.4-nano | gpt-5.4-nano | yes | yes | 7 | 1 | 1 |
+| deepseek-v4.1-flash | deepseek-v4.1-flash | no | cannot | 12 | 6 | 6 |
+| deepseek-v4.1-flash | gpt-5.4-nano | no | cannot | 12 | 5 | 3 |
+| gpt-5.4-nano | gpt-5.4-nano | no | cannot | 12 | 3 | 2 |
 
-- Told how, every call ended by the interviewer's hang-up at turn 7, right after the third question was answered, with no goodbye turns before it.
-- Not told, nobody could leave: all three calls ran to the 12 turn limit. They did not loop on goodbyes the whole way; goodbyes were 2 to 4 of the 12 turns, in runs of at most 2, mixed with more interview.
-- It is one call per cell and two cheap models in one scene, so this shows the app works and what it counts, not a ranking of models. In an earlier run a request to `deepseek-v4.1-flash` timed out after 120 seconds and the app reported that call as failed instead of hanging the run.
+- Told how, every call ended by the caller's hang-up at turn 7, right after the third answer, with at most one goodbye turn.
+- Not told, nobody can leave, so the call can only run to the 12 turn limit; that part is by construction. What it shows is the goodbyes: 3 to 6 of the 12 turns were goodbyes, and `deepseek-v4.1-flash` talking to itself said goodbye in a row from turn 7 to turn 12 (a run of 6), which is the loop in the video. With a different model or scene the numbers differ.
+- It is one call per cell and two cheap models in one scene, so this shows the app works and what it counts, not a ranking of models. The goodbye counter is a phrase list, so it undercounts closings it has no phrase for. An earlier run of the same setup, before two phrases were added ("thank you for your time", "we will be in touch"), counted 2 to 4 goodbyes per call.
 
 ![Results and the calls](docs/results.png)
 

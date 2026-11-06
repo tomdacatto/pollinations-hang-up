@@ -19,13 +19,17 @@ const scene = SCENES[0];
 test("only the hang-up phrase on its own ends a call", () => {
     assert.equal(isHangUp("[HANG UP]"), true);
     assert.equal(isHangUp("  [hang up].  "), true);
-    assert.equal(isHangUp("I will [HANG UP] now"), false);
+    assert.equal(isHangUp("Thanks, goodbye. [HANG UP]"), true);
+    assert.equal(isHangUp("I will hang up now"), false);
     assert.equal(isHangUp("Goodbye!"), false);
 });
 
 test("goodbyes are recognised and ordinary lines are not", () => {
     assert.equal(isFarewell("Thank you so much for your time, take care!"), true);
     assert.equal(isFarewell("Have a great day."), true);
+    assert.equal(isFarewell("Thank you for your time."), true);
+    assert.equal(isFarewell("We will be in touch soon."), true);
+    assert.equal(isFarewell("Looking forward to hearing from you."), true);
     assert.equal(isFarewell("Tell me about your last job."), false);
     assert.equal(isFarewell("The bypass is blocked."), false);
 });
@@ -133,4 +137,19 @@ test("the price of a call grows with the transcript and uses each side's model",
     const dear = { pricing: { promptTextTokens: 2, completionTextTokens: 2 } };
     assert.ok(callCost(cheap, dear, 8) > callCost(cheap, cheap, 8));
     assert.ok(callCost(cheap, cheap, 16) > callCost(cheap, cheap, 8));
+});
+
+test("a goodbye that carries the hang-up phrase ends the call, loses the phrase and still counts as a goodbye", async () => {
+    const lines = ["Hello.", "Hi.", "Thank you for your time. [HANG UP]"];
+    let n = 0;
+    const call = await runCall({
+        scene,
+        models: { a: "m1", b: "m2" },
+        told: true,
+        maxTurns: 10,
+        say: async () => lines[n++],
+    });
+    assert.equal(call.ended, "hangup");
+    assert.equal(call.transcript.at(-1).text, "Thank you for your time.");
+    assert.equal(call.farewells, 1);
 });

@@ -52,10 +52,12 @@ export function messagesFor(scene, side, told, transcript) {
     return [...messages, ...lines];
 }
 
-export const isHangUp = (text) => /^\W*\[hang ?up\]\W*$/i.test(text.trim());
+/** A reply that contains the hang-up phrase anywhere ends the call; the phrase itself is removed from the line. */
+export const isHangUp = (text) => /\[hang ?up\]/i.test(text);
+const stripHangUp = (text) => text.replace(/\[hang ?up\]/gi, "").trim() || HANG_UP;
 
 const FAREWELL =
-    /\b(good ?bye|bye|take care|have a (great|good|wonderful|nice|lovely) (day|one|evening|week)|talk (to you )?(soon|later)|thanks? (so much )?for (your|the) time|nice (talking|speaking) (to|with) you|goodnight|good night|farewell|all the best)\b/i;
+    /\b(good ?bye|bye|take care|have a (great|good|wonderful|nice|lovely) (day|one|evening|week)|talk (to you )?(soon|later)|thank(s| you)( so much)? for (your|the) time|nice (talking|speaking) (to|with) you|goodnight|good night|farewell|all the best|(we'll|we will) be in touch|look(ing)? forward to hearing)\b/i;
 
 /** Whether a turn is a goodbye. */
 export const isFarewell = (text) => FAREWELL.test(text);
@@ -72,8 +74,10 @@ export async function runCall({ scene, models, told, maxTurns, say, onTurn }) {
     let by = null;
     for (let i = 0; i < maxTurns; i++) {
         const side = i % 2 === 0 ? "a" : "b";
-        const text = (await say(models[side], messagesFor(scene, side, told, transcript))).trim();
-        const turn = { side, model: models[side], text, hangUp: isHangUp(text), farewell: isFarewell(text) };
+        const reply = (await say(models[side], messagesFor(scene, side, told, transcript))).trim();
+        const hangUp = isHangUp(reply);
+        const text = hangUp ? stripHangUp(reply) : reply;
+        const turn = { side, model: models[side], text, hangUp, farewell: isFarewell(text) };
         transcript.push(turn);
         onTurn?.(turn, transcript);
         if (turn.hangUp) {
@@ -91,7 +95,7 @@ export function farewells(transcript) {
     let run = 0;
     let count = 0;
     for (const turn of transcript) {
-        if (turn.farewell && !turn.hangUp) {
+        if (turn.farewell) {
             count++;
             run++;
             longest = Math.max(longest, run);

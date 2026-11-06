@@ -70,6 +70,7 @@ function paintCall(call) {
         bubble.append(el("span", "who", short(turn.model)), document.createTextNode(turn.text));
         bubbles.append(bubble);
     }
+    bubbles.scrollTop = bubbles.scrollHeight;
     badge.className = `badge ${call.error ? "v-error" : call.ended === "hangup" ? "v-decoded" : call.done ? "v-wrong" : ""}`;
     if (call.error) badge.textContent = "failed";
     else if (!call.done) badge.textContent = `${call.transcript.length} turns so far`;
